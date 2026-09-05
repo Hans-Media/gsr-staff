@@ -213,12 +213,13 @@
     box-shadow:-16px 0 40px rgba(10,18,22,.2);transform:translateX(100%);transition:transform .24s cubic-bezier(.4,0,.2,1);z-index:41;
     display:flex;flex-direction:column}
   .drawer.show{transform:translateX(0)}
+  #drawerContent{display:flex;flex-direction:column;height:100%;min-height:0}
   .dr-head{padding:18px 20px 14px;border-bottom:1px solid var(--line);border-top:4px solid var(--sev,var(--brand))}
   .dr-head .dr-x{position:absolute;top:14px;right:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;width:30px;height:30px;font-size:15px;color:var(--ink-soft)}
   .dr-head h3{font-size:20px;padding-right:34px}
   .dr-id{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);margin-top:3px}
   .dr-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-  .dr-body{padding:16px 20px 26px;overflow-y:auto;flex:1}
+  .dr-body{padding:16px 20px 26px;overflow-y:auto;flex:1;min-height:0}
   .contact{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:14px}
   .contact .cl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700}
   .contact .cnum{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink);font-weight:500}
@@ -487,7 +488,7 @@ let CURRENT=null, ONLINE=true, PENDING=0, PAGE=1, PSIZE=25, VIEW="aktif";
 const logs={};
 const F={q:"",tier:"",fu:"",budget:"",lok:"",pic:"",pipe:"",bulan:"",special:""};
 
-function baseScope(){ return CURRENT==="__admin__" ? DB : DB.filter(r=>r.pic.toLowerCase()===CURRENT); }
+function baseScope(){ if(CURRENT==="__admin__"){ return F.pic ? DB.filter(r=>r.pic===F.pic) : DB; } return DB.filter(r=>String(r.pic).toLowerCase()===CURRENT); }
 function scope(){ return baseScope().filter(r=> VIEW==="norespon" ? r.norespon : !r.norespon); }
 const SORT=(a,b)=> (perluFU(b.days)-perluFU(a.days)) || (tierRank[b.tier]-tierRank[a.tier]) || (b.days-a.days);
 function filtered(){
@@ -789,7 +790,7 @@ document.getElementById("loginForm").addEventListener("submit",e=>{
     const pw=document.getElementById("picWrap");pw.style.display="";
     const sel=document.getElementById("fPic");
     [...new Set(DB.map(d=>d.pic))].sort().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;sel.appendChild(o);});
-    sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;render();});
+    sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;updateTabCounts();applyViewChrome();renderKPIs();if(VIEW!=="norespon")renderAnalysis();render();markKPI();});
   }
   document.getElementById("login").style.display="none";
   document.getElementById("app").style.display="block";
@@ -904,7 +905,7 @@ function enterAs(who){
     const pw=document.getElementById("picWrap"); pw.style.display="";
     const sel=document.getElementById("fPic");
     [...new Set(DB.map(d=>d.pic))].sort().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;sel.appendChild(o);});
-    sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;render();});
+    sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;updateTabCounts();applyViewChrome();renderKPIs();if(VIEW!=="norespon")renderAnalysis();render();markKPI();});
   }
   document.getElementById("login").style.display="none";
   document.getElementById("app").style.display="block";
