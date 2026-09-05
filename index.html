@@ -789,7 +789,7 @@ document.getElementById("loginForm").addEventListener("submit",e=>{
   if(res.admin){
     const pw=document.getElementById("picWrap");pw.style.display="";
     const sel=document.getElementById("fPic");
-    [...new Set(DB.map(d=>d.pic))].sort().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;sel.appendChild(o);});
+    fillPicDropdown();
     sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;updateTabCounts();applyViewChrome();renderKPIs();if(VIEW!=="norespon")renderAnalysis();render();markKPI();});
   }
   document.getElementById("login").style.display="none";
@@ -816,8 +816,16 @@ function setLiveBadge(mode, count, when){
   else { el.style.background="#2a2416"; el.style.color="#f0c674"; el.style.border="1px solid #6b5626";
     el.textContent="○ Snapshot ("+count+" leads) · data live tidak terjangkau"; }
 }
+function fillPicDropdown(){
+  if(CURRENT!=="__admin__") return;
+  var sel=document.getElementById("fPic"); if(!sel) return;
+  var cur=F.pic||"";
+  var names=[...new Set(DB.map(function(d){return d.pic;}))].sort();
+  sel.innerHTML='<option value="">Semua PIC</option>'+names.map(function(m){return "<option"+(m===cur?" selected":"")+">"+m+"</option>";}).join("");
+}
 function rerenderIfIn(){
   if(!CURRENT) return;
+  fillPicDropdown();
   updateTabCounts(); applyViewChrome(); renderKPIs();
   if(VIEW!=="norespon") renderAnalysis(); render(); markKPI();
 }
@@ -904,7 +912,7 @@ function enterAs(who){
   if(res.admin){
     const pw=document.getElementById("picWrap"); pw.style.display="";
     const sel=document.getElementById("fPic");
-    [...new Set(DB.map(d=>d.pic))].sort().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;sel.appendChild(o);});
+    fillPicDropdown();
     sel.addEventListener("change",ev=>{F.pic=ev.target.value;PAGE=1;updateTabCounts();applyViewChrome();renderKPIs();if(VIEW!=="norespon")renderAnalysis();render();markKPI();});
   }
   document.getElementById("login").style.display="none";
