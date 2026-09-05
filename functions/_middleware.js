@@ -62,13 +62,15 @@ export async function onRequest(context) {
     if (who) {
       const token = await sign(who);
       const maxAge = SESSION_HOURS * 3600;
-      const res = await next();                // sajikan dashboard
-      const h = new Headers(res.headers);
+      // Set cookie lalu REDIRECT ke "/" (GET) — jangan serve static via POST (bikin 405).
+      const h = new Headers();
       h.append("Set-Cookie", `${COOKIE}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`);
       // cookie identitas dibaca oleh dashboard (bukan HttpOnly), umur sama
       h.append("Set-Cookie", `${WHO_COOKIE}=${who}; Path=/; Max-Age=${maxAge}; Secure; SameSite=Lax`);
+      h.set("Location", "/");
+      h.set("Cache-Control", "no-store");
       logLogin(context, pin, who);
-      return new Response(res.body, { status: res.status, headers: h });
+      return new Response(null, { status: 302, headers: h });
     }
     return new Response(loginPage("PIN salah. Coba lagi."), {
       status: 401, headers: { "Content-Type": "text/html; charset=utf-8" },
